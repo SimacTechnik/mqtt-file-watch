@@ -1,0 +1,16 @@
+{
+  "name": "mqtt-filewatch.js",
+  "version": "1.0.0",
+  "description": "Module listenning for chnages in speicifed file sending them using MQTT.",
+  "main": "app.js",
+  "dependencies": {
+    "glob": "^7.1.3",
+    "mqtt": "^2.18.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Lukáš Hruška",
+  "license": "MIT"
+}
