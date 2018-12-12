@@ -23,6 +23,8 @@ const mqttTopic = process.argv[5];
 
 const client = mqtt.connect(mqttUrl, {username: mqttUsername, clientId: "AccessLog", queueQoSZero: true});
 
+const maxObjCount = 10;
+
 let migrationRegex = null;
 
 let begin = false;
@@ -34,6 +36,8 @@ let dataBuffer = [];
 let sendInterval = null;
 
 let debugging = false;
+
+let sending = false;
 
 if(process.argv.length > requiredParams) {
     for(let i = requiredParams; i < process.argv.length; i++) {
@@ -142,8 +146,8 @@ function sendFile(path) {
     debug("in sendFile(path="+path+") function");
     let stringStream = fs.readFileSync(path, {encoding: "utf8"});
     let lines = stringStream.split('\n');
+    debug("sending "+lines.length+" lines");
     lines.forEach(function (line) {
-        debug("loading line: " + line);
         dataBuffer.push(line);
     });
 }
@@ -176,30 +180,49 @@ function log(msg) {
     process.stdout.write('[' + new Date().getTime().toString() + "]\t" + "LOG: " + msg + '\n');
 }
 
-function handleBuffer() {
-    debug("in handleBuffer() function");
-    if(!connected)
-        return;
-    let toSend = dataBuffer;
-    dataBuffer = [];
-    toSend.forEach(function (value) {
-        sendValue(value);
-    });
+function warn(msg) {
+    process.stdout.write('[' + new Date().getTime().toString() + "]\t" + "WARN: " + msg + '\n');
 }
 
-function sendValue(value) {
-    debug("in sendValue(value="+value+") function");
+function handleBuffer() {
+    debug("in handleBuffer() function");
+    if(!connected || sending)
+        return;
+    sending = true;
+    let toSend = dataBuffer;
+    dataBuffer = [];
+    if(toSend.length > 0)
+        // separating messages to smaller one
+        sendValue(toSend);
+}
+
+function sendValue(values) {
+    debug("in sendValue function");
     if(!connected) {
-        dataBuffer.push(value);
+        values.forEach(function(val) {
+            dataBuffer.push(val);
+        });
         return;
     }
-    debug("sending: "+value);
-    let tmpObj = {};
-    tmpObj[new Date().getTime().toString()] = value;
-    client.publish(mqttTopic, JSON.stringify(tmpObj), function (e) {
+    let sndValues = values.slice(0, 10);
+    if(sndValues.length == 0) {
+        sending = false;
+        return;
+    }
+    let toSend = values.splice(10);
+    let sndObj = {};
+    sndObj["timestamp"] = new Date().getTime();
+    sndObj["data"] = sndValues;
+    debug(JSON.stringify(sndObj));
+    client.publish(mqttTopic, JSON.stringify(sndObj), function (e) {
         if(e) {
             log("MQTT disconected while sending data");
             sendValue(value);
+        }
+        else {
+            setTimeout(function() {
+                sendValue(toSend);
+            }, 200);
         }
     });
 }
