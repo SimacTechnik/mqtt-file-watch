@@ -21,7 +21,7 @@ const mqttUsername = process.argv[4];
 
 const mqttTopic = process.argv[5];
 
-const client = mqtt.connect(mqttUrl, {username: mqttUsername, clientId: "AccessLog", queueQoSZero: true});
+const client = mqtt.connect(mqttUrl, {username: mqttUsername, clientId: "mqtt_"+Math.random().toString(36).substring(7), clean: false});
 
 const maxObjCount = 10;
 
@@ -191,8 +191,8 @@ function handleBuffer() {
     sending = true;
     let toSend = dataBuffer;
     dataBuffer = [];
+    debug("sending "+Math.ceil(toSend.length/maxObjCount)+" messsages");
     if(toSend.length > 0)
-        // separating messages to smaller one
         sendValue(toSend);
 }
 
@@ -204,17 +204,16 @@ function sendValue(values) {
         });
         return;
     }
-    let sndValues = values.slice(0, 10);
+    let sndValues = values.slice(0, maxObjCount);
     if(sndValues.length == 0) {
         sending = false;
         return;
     }
-    let toSend = values.splice(10);
+    let toSend = values.splice(maxObjCount);
     let sndObj = {};
     sndObj["timestamp"] = new Date().getTime();
     sndObj["data"] = sndValues;
-    debug(JSON.stringify(sndObj));
-    client.publish(mqttTopic, JSON.stringify(sndObj), function (e) {
+    client.publish(mqttTopic, JSON.stringify(sndObj), {qos: 1}, function (e) {
         if(e) {
             log("MQTT disconected while sending data");
             sendValue(value);
