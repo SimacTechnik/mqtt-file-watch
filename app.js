@@ -206,7 +206,6 @@ function sendValue(values) {
         values.forEach(function(val) {
             dataBuffer.push(val);
         });
-<<<<<<< HEAD
         return;
     }
     let sndValues = values.slice(0, maxObjCount);
@@ -214,15 +213,6 @@ function sendValue(values) {
         sending = false;
         return;
     }
-=======
-        return;
-    }
-    let sndValues = values.slice(0, maxObjCount);
-    if(sndValues.length == 0) {
-        sending = false;
-        return;
-    }
->>>>>>> adab8cac65b3dc017ee84bd4049f48cbf0041ac8
     let toSend = values.splice(maxObjCount);
     let sndObj = {};
     sndObj["timestamp"] = new Date().getTime();
