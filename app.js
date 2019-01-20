@@ -21,7 +21,11 @@ const mqttUsername = process.argv[4];
 
 const mqttTopic = process.argv[5];
 
+<<<<<<< HEAD
 const client = mqtt.connect(mqttUrl, {username: mqttUsername, clean: false});
+=======
+const client = mqtt.connect(mqttUrl, {username: mqttUsername, clientId: "mqtt_"+Math.random().toString(36).substring(7), clean: false});
+>>>>>>> adab8cac65b3dc017ee84bd4049f48cbf0041ac8
 
 const maxObjCount = 10;
 
@@ -202,6 +206,7 @@ function sendValue(values) {
         values.forEach(function(val) {
             dataBuffer.push(val);
         });
+<<<<<<< HEAD
         return;
     }
     let sndValues = values.slice(0, maxObjCount);
@@ -209,6 +214,15 @@ function sendValue(values) {
         sending = false;
         return;
     }
+=======
+        return;
+    }
+    let sndValues = values.slice(0, maxObjCount);
+    if(sndValues.length == 0) {
+        sending = false;
+        return;
+    }
+>>>>>>> adab8cac65b3dc017ee84bd4049f48cbf0041ac8
     let toSend = values.splice(maxObjCount);
     let sndObj = {};
     sndObj["timestamp"] = new Date().getTime();
