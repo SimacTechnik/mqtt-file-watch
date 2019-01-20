@@ -21,11 +21,7 @@ const mqttUsername = process.argv[4];
 
 const mqttTopic = process.argv[5];
 
-<<<<<<< HEAD
-const client = mqtt.connect(mqttUrl, {username: mqttUsername, clean: false});
-=======
 const client = mqtt.connect(mqttUrl, {username: mqttUsername, clientId: "mqtt_"+Math.random().toString(36).substring(7), clean: false});
->>>>>>> adab8cac65b3dc017ee84bd4049f48cbf0041ac8
 
 const maxObjCount = 10;
 
