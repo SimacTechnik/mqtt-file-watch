@@ -103,7 +103,12 @@ client.on('connect', function () {
         clearInterval(sendInterval);
         sendInterval = null;
      }
- })
+ });
+
+ client.on('error', function (err) {
+    debug("in client.on 'error' function");
+    warn(error.message);
+ });
 
 if(migrationRegex != null) {
     log("Migrating files matched by regex");
@@ -115,7 +120,10 @@ if(begin) {
     sendFile(filePath);
 }
 
-fs.watchFile(filePath, {interval: 1000}, function (curr, prev) {
+fs.watchFile(filePath, {interval: 1000, persistent: true}, function (curr, prev) {
+    // if file not found, on UNIX all fields zeroed, on Windows field 'blocks' is undefined
+    if(curr.blocks == null || curr.size == 0)
+        return;
     fs.open(filePath, 'r', function (e, fd) {
         if(e) {
             err(e.msg);
@@ -181,7 +189,7 @@ function log(msg) {
 }
 
 function warn(msg) {
-    process.stdout.write('[' + new Date().getTime().toString() + "]\t" + "WARN: " + msg + '\n');
+    process.stderr.write('[' + new Date().getTime().toString() + "]\t" + "WARN: " + msg + '\n');
 }
 
 function handleBuffer() {
