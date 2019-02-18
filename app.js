@@ -199,9 +199,11 @@ function handleBuffer() {
     sending = true;
     let toSend = dataBuffer;
     dataBuffer = [];
-    debug("sending "+Math.ceil(toSend.length/maxObjCount)+" messsages");
+    debug("sending "+Math.ceil(toSend.length/maxObjCount)+" messages");
     if(toSend.length > 0)
         sendValue(toSend);
+    else
+        sending = false;
 }
 
 function sendValue(values) {
